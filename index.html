@@ -232,6 +232,8 @@
             cardAnswer: [],
             currentChoices: [],
             countdownValue: 3,
+            remainingWords: [],
+            remainingUnit: null,
             userStats: JSON.parse(localStorage.getItem('userStats')) || {
                 cumulativeTotal: 0,
                 unitBests: {}
@@ -320,9 +322,12 @@
 
         function pickQuestion() {
             const pool = getWordsByGrade().filter(w => w.unit === state.unit);
-            let candidates = pool.filter(w => w.en !== state.lastCorrectEn);
-            if (candidates.length === 0) candidates = pool;
-            const next = candidates[Math.floor(Math.random() * candidates.length)];
+            if (state.remainingUnit !== state.unit || state.remainingWords.length === 0) {
+                state.remainingUnit = state.unit;
+                state.remainingWords = [...pool];
+            }
+            const idx = Math.floor(Math.random() * state.remainingWords.length);
+            const next = state.remainingWords.splice(idx, 1)[0];
             state.currentWord = next;
             state.questionStartTime = Date.now();
             state.cardAnswer = [];
@@ -358,6 +363,7 @@
                     clearInterval(interval);
                     state.screen = "game";
                     state.score = 0; state.correctCount = 0; state.wrongWords = []; state.lastCorrectEn = null;
+                    state.remainingWords = []; state.remainingUnit = null;
                     startTimer(); pickQuestion();
                 } else {
                     render();
