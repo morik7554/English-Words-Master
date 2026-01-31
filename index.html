@@ -183,16 +183,10 @@
     </div>
 
     <script type="module">
-        const WORDS = [
-            { jp: "りんご", en: "apple", unit: "UNIT1" }, { jp: "犬", en: "dog", unit: "UNIT1" },
-            { jp: "猫", en: "cat", unit: "UNIT1" }, { jp: "本", en: "book", unit: "UNIT1" },
-            { jp: "机", en: "desk", unit: "UNIT1" }, { jp: "学校", en: "school", unit: "UNIT2" },
-            { jp: "先生", en: "teacher", unit: "UNIT2" }, { jp: "生徒", en: "student", unit: "UNIT2" },
-            { jp: "教室", en: "classroom", unit: "UNIT2" }, { jp: "友達", en: "friend", unit: "UNIT2" },
-            { jp: "水", en: "water", unit: "UNIT3" }, { jp: "オレンジ", en: "orange", unit: "UNIT3" },
-            { jp: "ペン", en: "pen", unit: "UNIT3" }, { jp: "ノート", en: "notebook", unit: "UNIT3" },
-            { jp: "鞄", en: "bag", unit: "UNIT3" }
-        ];
+        import { grade1Words } from "./data/grade1.js";
+        import { grade2Words } from "./data/grade2.js";
+        import { grade3Words } from "./data/grade3.js";
+        const WORDS = grade1Words;
 
         const state = {
             screen: "init",
