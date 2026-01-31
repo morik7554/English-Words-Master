@@ -490,7 +490,14 @@
                     <button id="mode-card" class="${state.mode === 'card' ? '' : 'secondary'}">Card</button>
                 </div></div>
                 <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    ${getUnits().map(u => `<button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}">${u}</button>`).join('')}
+                    ${getUnits().map(u => `
+                        <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}">
+                            <div>${u}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                                High Score: ${state.userStats.gradeBests?.[state.grade]?.unitBests?.[u] || 0}
+                            </div>
+                        </button>
+                    `).join('')}
                 </div></div>
                 <div style="margin-top: auto;">
                     <button id="btn-go" style="background: var(--correct); border-color: var(--correct);">ゲーム開始！</button>
