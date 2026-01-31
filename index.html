@@ -486,8 +486,18 @@
                         </div></div>
                     `}
                 </div>
-                <div style="margin-top: auto; padding-top: 20px;"><button id="btn-quit" class="secondary" style="min-height: 40px; padding: 10px;">中断する</button></div>
+                <div style="margin-top: auto; padding-top: 20px; display: flex; gap: 10px;">
+                    <button id="btn-skip" class="secondary" style="min-height: 40px; padding: 10px; flex: 1;">スキップ</button>
+                    <button id="btn-quit" class="secondary" style="min-height: 40px; padding: 10px; flex: 1;">中断する</button>
+                </div>
             `;
+            el.querySelector('#btn-skip').onclick = () => {
+                if (state.currentWord) {
+                    state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en });
+                    triggerFeedback(false);
+                }
+                pickQuestion();
+            };
             el.querySelector('#btn-quit').onclick = () => {
                 showModal("ゲームを中断しますか？", [{ text: "いいえ" }, { text: "はい", onClick: () => { clearInterval(state.timerId); state.screen = "title"; render(); } }]);
             };
