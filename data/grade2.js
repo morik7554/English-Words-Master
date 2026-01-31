@@ -1,4 +1,4 @@
-export const words2 = [
+export const grade2Words = [
     { en: "gift", jp: "贈り物、土産物", unit: "Unit1" },
     { en: "same", jp: "同じ", unit: "Unit1" },
     { en: "met", jp: "meetの過去形、過去分詞", unit: "Unit1" },

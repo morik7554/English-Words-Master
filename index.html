@@ -213,6 +213,8 @@
         };
 
         const UNITS = [...new Set(WORDS.map(w => w.unit))];
+        console.log("WORDS.length", WORDS.length);
+        console.log("UNITS", UNITS);
         const $ = (id) => document.getElementById(id);
 
         // --- Core Functions ---

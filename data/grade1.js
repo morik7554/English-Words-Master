@@ -1,4 +1,4 @@
-export const words1 = [
+export const grade1Words = [
     { en: "here", jp: "ここに、ここで、こちらへ", unit: "Unit1" },
     { en: "all", jp: "全て、みんな", unit: "Unit1" },
     { en: "about", jp: "～について（の）", unit: "Unit1" },
