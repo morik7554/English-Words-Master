@@ -201,6 +201,12 @@
             return [...new Set(getWordsByGrade().map(w => w.unit))];
         }
 
+        function getTypingHint(word) {
+            if (!word) return "";
+            const first = word[0];
+            return first + "-".repeat(Math.max(0, word.length - 1));
+        }
+
         const state = {
             screen: "init",
             lastRenderedScreen: null,
@@ -476,9 +482,12 @@
         }
 
         function renderGame(el) {
+            const hintText = state.mode === 'typing'
+                ? getTypingHint(state.currentWord?.en)
+                : "英単語を入力してください";
             el.innerHTML = `
                 <div class="game-header"><div class="score-display">Score: ${state.score}</div><div class="timer">${state.timeLeft}</div></div>
-                <div class="question-card"><div class="question-jp">${state.currentWord.jp}</div><div class="question-hint">英単語を入力してください</div></div>
+                <div class="question-card"><div class="question-jp">${state.currentWord.jp}</div><div class="question-hint">${hintText}</div></div>
                 <div class="input-area">
                     ${state.mode === 'typing' ? `
                         <input type="text" class="typing-input" spellcheck="false" autocomplete="off" autofocus>
