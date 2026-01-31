@@ -188,17 +188,25 @@
         import { grade3Words } from "./data/grade3.js";
         const WORDS = grade1Words;
 
-        function getWordsByGrade() {
-            if (state.grade === "grade1") return filterPhrases(grade1Words);
-            if (state.grade === "grade2") return filterPhrases(grade2Words);
-            if (state.grade === "grade3") return filterPhrases(grade3Words);
+        function getWordsByGradeKey(gradeKey) {
+            if (gradeKey === "grade1") return filterPhrases(grade1Words);
+            if (gradeKey === "grade2") return filterPhrases(grade2Words);
+            if (gradeKey === "grade3") return filterPhrases(grade3Words);
             return [];
+        }
+
+        function getWordsByGrade() {
+            return getWordsByGradeKey(state.grade);
         }
 
         const filterPhrases = (list) => list.filter(w => !w.en.trim().includes(' '));
 
         function getUnits() {
             return [...new Set(getWordsByGrade().map(w => w.unit))];
+        }
+
+        function getUnitsByGrade(gradeKey) {
+            return [...new Set(getWordsByGradeKey(gradeKey).map(w => w.unit))];
         }
 
         function getTypingHint(word) {
@@ -218,6 +226,7 @@
             lastRenderedScreen: null,
             mode: "typing",
             grade: "grade1",
+            rankingGrade: null,
             unit: "Unit1",
             timeLeft: 40,
             score: 0,
@@ -236,9 +245,13 @@
             remainingUnit: null,
             userStats: JSON.parse(localStorage.getItem('userStats')) || {
                 cumulativeTotal: 0,
-                unitBests: {}
+                gradeBests: {}
             }
         };
+
+        if (!state.userStats.gradeBests && state.userStats.unitBests) {
+            state.userStats.gradeBests = { grade1: { unitBests: state.userStats.unitBests } };
+        }
 
         console.log("WORDS.length", WORDS.length);
         console.log("UNITS", getUnits());
@@ -253,9 +266,13 @@
 
         function updateRecords(sessionScore) {
             state.userStats.cumulativeTotal += sessionScore;
-            const currentBest = state.userStats.unitBests[state.unit] || 0;
+            if (!state.userStats.gradeBests[state.grade]) {
+                state.userStats.gradeBests[state.grade] = { unitBests: {} };
+            }
+            const unitBests = state.userStats.gradeBests[state.grade].unitBests;
+            const currentBest = unitBests[state.unit] || 0;
             if (sessionScore > currentBest) {
-                state.userStats.unitBests[state.unit] = sessionScore;
+                unitBests[state.unit] = sessionScore;
             }
             localStorage.setItem('userStats', JSON.stringify(state.userStats));
         }
@@ -407,6 +424,7 @@
                 case "game": renderGame(screenDiv); break;
                 case "result": renderResult(screenDiv); break;
                 case "ranking": renderRanking(screenDiv); break;
+                case "rankingUnits": renderRankingUnits(screenDiv); break;
                 case "settings": renderSettings(screenDiv); break;
             }
             container.appendChild(screenDiv);
@@ -585,25 +603,48 @@
         }
 
         function renderRanking(el) {
-            const totalHighScore = Object.values(state.userStats.unitBests).reduce((a, b) => a + b, 0);
             el.innerHTML = `
-                <h1>個人記録</h1>
+                <h1>学年選択</h1>
+                <div style="display: grid; gap: 10px;">
+                    <button data-rank-grade="grade1">1年</button>
+                    <button data-rank-grade="grade2">2年</button>
+                    <button data-rank-grade="grade3">3年</button>
+                </div>
+                <div style="margin-top: auto;"><button id="btn-rank-back" class="secondary">戻る</button></div>
+            `;
+            el.querySelectorAll("button[data-rank-grade]").forEach(b => {
+                b.onclick = () => {
+                    state.rankingGrade = b.dataset.rankGrade;
+                    state.screen = "rankingUnits";
+                    render();
+                };
+            });
+            el.querySelector('#btn-rank-back').onclick = () => { state.screen = "title"; render(); };
+        }
+
+        function renderRankingUnits(el) {
+            const gradeKey = state.rankingGrade || "grade1";
+            const gradeStats = state.userStats.gradeBests?.[gradeKey]?.unitBests || {};
+            const totalHighScore = Object.values(gradeStats).reduce((a, b) => a + b, 0);
+            const gradeLabel = gradeKey === "grade1" ? "1年" : gradeKey === "grade2" ? "2年" : "3年";
+            el.innerHTML = `
+                <h1>個人記録（${gradeLabel}）</h1>
                 <div class="my-stats-card">
                     <p style="font-weight:bold; margin-bottom:10px; border-bottom:1px solid #334155;">あなたのハイスコア</p>
                     <div class="stat-row"><span>累計ポイント:</span> <span class="stat-val">${state.userStats.cumulativeTotal}</span></div>
                     <div class="stat-row"><span>自己ベスト合計:</span> <span class="stat-val">${totalHighScore}</span></div>
                     <div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">ユニット別ベストスコア:</div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
-                        ${getUnits().map(u => `
+                        ${getUnitsByGrade(gradeKey).map(u => `
                             <div style="font-size:0.75rem; background:#0f172a; padding:4px; border-radius:4px;">
-                                ${u}: <span style="color:var(--accent); font-weight:bold;">${state.userStats.unitBests[u] || 0}</span>
+                                ${u}: <span style="color:var(--accent); font-weight:bold;">${gradeStats[u] || 0}</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-                <div style="margin-top: auto;"><button id="btn-rank-back" class="secondary">戻る</button></div>
+                <div style="margin-top: auto;"><button id="btn-rank-units-back" class="secondary">戻る</button></div>
             `;
-            el.querySelector('#btn-rank-back').onclick = () => { state.screen = "title"; render(); };
+            el.querySelector('#btn-rank-units-back').onclick = () => { state.screen = "ranking"; render(); };
         }
 
         function renderSettings(el) {
@@ -617,7 +658,7 @@
             el.querySelector('#btn-reset-rank').onclick = () => {
                 showModal("あなたの全てのデータを削除しますか？", [{ text: "キャンセル" }, { text: "削除する", type: "danger", onClick: () => {
                     localStorage.removeItem('userStats');
-                    state.userStats = { cumulativeTotal: 0, unitBests: {} };
+                    state.userStats = { cumulativeTotal: 0, gradeBests: {} };
                     showModal("データを削除しました。");
                 }}]);
             };
