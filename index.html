@@ -188,10 +188,18 @@
         import { grade3Words } from "./data/grade3.js";
         const WORDS = grade1Words;
 
+        function getWordsByGrade() {
+            if (state.grade === "grade1") return grade1Words;
+            if (state.grade === "grade2") return grade2Words;
+            if (state.grade === "grade3") return grade3Words;
+            return [];
+        }
+
         const state = {
             screen: "init",
             lastRenderedScreen: null,
             mode: "typing",
+            grade: "grade1",
             unit: "UNIT1",
             timeLeft: 40,
             score: 0,
@@ -212,7 +220,7 @@
             }
         };
 
-        const UNITS = [...new Set(WORDS.map(w => w.unit))];
+        const UNITS = [...new Set(getWordsByGrade().map(w => w.unit))];
         console.log("WORDS.length", WORDS.length);
         console.log("UNITS", UNITS);
         const $ = (id) => document.getElementById(id);
@@ -294,7 +302,7 @@
         }
 
         function pickQuestion() {
-            const pool = WORDS.filter(w => w.unit === state.unit);
+            const pool = getWordsByGrade().filter(w => w.unit === state.unit);
             let candidates = pool.filter(w => w.en !== state.lastCorrectEn);
             if (candidates.length === 0) candidates = pool;
             const next = candidates[Math.floor(Math.random() * candidates.length)];
@@ -341,7 +349,7 @@
         }
 
         function startTimer() {
-            state.timeLeft = 40;
+            state.timeLeft = 60;
             state.timerId = setInterval(() => {
                 state.timeLeft--;
                 const timerEl = document.querySelector('.timer');
@@ -370,6 +378,7 @@
             switch (state.screen) {
                 case "init": renderInit(screenDiv); break;
                 case "title": renderTitle(screenDiv); break;
+                case "grade": renderGrade(screenDiv); break;
                 case "select": renderSelect(screenDiv); break;
                 case "countdown": renderCountdown(screenDiv); break;
                 case "game": renderGame(screenDiv); break;
@@ -405,9 +414,30 @@
                     <button id="btn-settings" class="secondary">設定</button>
                 </div>
             `;
-            el.querySelector('#btn-start').onclick = () => { state.screen = "select"; render(); };
+            el.querySelector('#btn-start').onclick = () => { state.screen = "grade"; render(); };
             el.querySelector('#btn-ranking').onclick = () => { state.screen = "ranking"; render(); };
             el.querySelector('#btn-settings').onclick = () => { state.screen = "settings"; render(); };
+        }
+
+        function renderGrade(el) {
+            el.innerHTML = `
+                <h1>学年選択</h1>
+                <button data-grade="grade1">1年</button>
+                <button data-grade="grade2">2年</button>
+                <button data-grade="grade3">3年</button>
+                <button class="secondary" id="grade-back">戻る</button>
+            `;
+            el.querySelectorAll("button[data-grade]").forEach(b => {
+                b.onclick = () => {
+                    state.grade = b.dataset.grade;
+                    state.screen = "select";
+                    render();
+                };
+            });
+            el.querySelector("#grade-back").onclick = () => {
+                state.screen = "title";
+                render();
+            };
         }
 
         function renderSelect(el) {
