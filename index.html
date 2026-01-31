@@ -189,11 +189,13 @@
         const WORDS = grade1Words;
 
         function getWordsByGrade() {
-            if (state.grade === "grade1") return grade1Words;
-            if (state.grade === "grade2") return grade2Words;
-            if (state.grade === "grade3") return grade3Words;
+            if (state.grade === "grade1") return filterPhrases(grade1Words);
+            if (state.grade === "grade2") return filterPhrases(grade2Words);
+            if (state.grade === "grade3") return filterPhrases(grade3Words);
             return [];
         }
+
+        const filterPhrases = (list) => list.filter(w => !w.en.trim().includes(' '));
 
         function getUnits() {
             return [...new Set(getWordsByGrade().map(w => w.unit))];
