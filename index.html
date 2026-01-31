@@ -491,7 +491,7 @@
                 </div></div>
                 <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     ${getUnits().map(u => `
-                        <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}">
+                        <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}" style="flex-direction: column;">
                             <div>${u}</div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
                                 ${state.userStats.gradeBests?.[state.grade]?.unitBests?.[u] || 0}
