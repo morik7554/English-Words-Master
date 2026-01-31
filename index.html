@@ -494,7 +494,7 @@
                         <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}">
                             <div>${u}</div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                                High Score: ${state.userStats.gradeBests?.[state.grade]?.unitBests?.[u] || 0}
+                                ${state.userStats.gradeBests?.[state.grade]?.unitBests?.[u] || 0}
                             </div>
                         </button>
                     `).join('')}
