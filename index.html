@@ -480,21 +480,17 @@
                 <div class="input-area">
                     ${state.mode === 'typing' ? `
                         <input type="text" class="typing-input" spellcheck="false" autocomplete="off" autofocus>
-                        <div style="margin-top: 12px;">
-                            <button id="btn-skip" class="secondary" style="min-height: 40px; padding: 10px; width: 100%;">スキップ</button>
-                        </div>
                     ` : `
                         <div class="card-area"><div class="answer-slots">
                             ${state.cardAnswer.map((item, i) => `<div class="char-card active-ans" data-idx="${i}">${item.char}</div>`).join('')}
                         </div><div class="choice-pool">
                             ${state.currentChoices.map((item) => `<div class="char-card choice-card ${item.used ? 'used' : ''}" data-id="${item.id}">${item.char}</div>`).join('')}
                         </div></div>
-                        <div style="margin-top: 12px;">
-                            <button id="btn-skip" class="secondary" style="min-height: 40px; padding: 10px; width: 100%;">スキップ</button>
-                        </div>
                     `}
                 </div>
-                <div style="margin-top: auto; padding-top: 20px;">
+                <div style="margin-top: auto; padding-top: 28px;">
+                    <button id="btn-skip" class="secondary" style="min-height: 40px; padding: 10px; width: 100%;">スキップ</button>
+                    <div style="height: 10px;"></div>
                     <button id="btn-quit" class="secondary" style="min-height: 40px; padding: 10px; width: 100%;">中断する</button>
                 </div>
             `;
