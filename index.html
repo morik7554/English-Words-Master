@@ -357,7 +357,7 @@
             }
         }
 
-        function handleAnswer(answer) {
+    function handleAnswer(answer) {
     const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const isCorrect = normalize(answer) === normalize(state.currentWord.en);
     window.speakWord(state.currentWord.en);
@@ -365,21 +365,23 @@
     if (isCorrect) {
         // コンボ加算
         state.comboCount++;
-        // 倍率計算 (最大2.0)
         const multiplier = Math.min(2.0, 1 + (state.comboCount - 1) * 0.1);
 
-        // 基礎点計算
+        // 基礎点計算 (1秒後から0.5秒ごとに-4点)
         const elapsed = (Date.now() - state.questionStartTime) / 1000;
         let basePoints = 100;
         if (elapsed > 1) basePoints -= Math.floor((elapsed - 1) / 0.5) * 4;
         
-        // 最終スコア加算
         state.score += Math.floor(Math.max(0, basePoints) * multiplier);
         state.correctCount++;
-        // ... (以下略)
+        state.lastCorrectEn = state.currentWord.en;
+        triggerFeedback(true);
+        pickQuestion();
     } else {
         state.comboCount = 0; // コンボリセット
-        // ...
+        state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en });
+        triggerFeedback(false);
+        pickQuestion();
     }
 }
 
