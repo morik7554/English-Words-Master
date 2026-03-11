@@ -379,7 +379,7 @@
         pickQuestion();
     } else {
         state.comboCount = 0; // コンボリセット
-        state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en });
+        state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en, userAnswer: answer });
         triggerFeedback(false);
         pickQuestion();
     }
@@ -560,7 +560,7 @@
             `;
             el.querySelector('#btn-skip').onclick = () => {
                 if (state.currentWord) {
-                    state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en });
+                    state.wrongWords.push({ jp: state.currentWord.jp, en: state.currentWord.en, userAnswer: 'スキップ' });
                     triggerFeedback(false);
                 }
                 pickQuestion();
@@ -602,8 +602,11 @@
                 <div class="result-list">
                     ${state.wrongWords.length > 0 ? state.wrongWords.map(w => `
                         <div class="result-item">
-                            <span style="flex: 1.5; font-size: 0.95rem;">${w.jp}</span>
-                            <span style="flex: 2; font-weight: bold; color: var(--wrong); text-align: center;">${w.en}</span>
+                            <div style="flex: 1.5; font-size: 0.95rem;">${w.jp}</div>
+                            <div style="flex: 2; text-align: center;">
+                                <div style="font-weight: bold; color: var(--wrong);">${w.en}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">入力: ${w.userAnswer || ''}</div>
+                            </div>
                             <button class="speak-btn" data-word="${w.en}" style="min-height: 35px; width: 45px; padding: 0; margin: 0; border-color: var(--text-muted); background: transparent; flex-shrink: 0; font-size: 1.2rem;">🔈</button>
                         </div>
                     `).join('') : '<p style="text-align:center; padding: 20px;">全問正解！素晴らしい！</p>'}
