@@ -360,7 +360,7 @@
     function handleAnswer(answer) {
     const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const isCorrect = normalize(answer) === normalize(state.currentWord.en);
-    window.speakWord(state.currentWord.en);
+    speakWord(state.currentWord.en);
 
     if (isCorrect) {
         // コンボ加算
