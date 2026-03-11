@@ -241,6 +241,7 @@
             cardAnswer: [],
             currentChoices: [],
             countdownValue: 3,
+            comboCount: 0,
             remainingWords: [],
             remainingUnit: null,
             userStats: JSON.parse(localStorage.getItem('userStats')) || {
@@ -397,7 +398,7 @@
                 if (state.countdownValue <= 0) {
                     clearInterval(interval);
                     state.screen = "game";
-                    state.score = 0; state.correctCount = 0; state.wrongWords = []; state.lastCorrectEn = null;
+                    state.score = 0; state.correctCount = 0; state.wrongWords = []; state.lastCorrectEn = null; state.comboCount = 0;
                     state.remainingWords = []; state.remainingUnit = null;
                     startTimer(); pickQuestion();
                 } else {
