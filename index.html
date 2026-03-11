@@ -541,7 +541,7 @@
                 ? getTypingHint(state.currentWord?.en)
                 : "英単語を入力してください";
             el.innerHTML = `
-                <div class="game-header"><div class="score-display">Score: ${state.score}</div><div class="timer">${state.timeLeft}</div></div>
+                <div class="game-header"><div class="score-display">Score: ${state.score} | Combo: ${state.comboCount || 0}</div><div class="timer">${state.timeLeft}</div></div>
                 <div class="question-card"><div class="question-jp">${state.currentWord.jp}</div><div class="question-hint">${hintText}</div></div>
                 <div class="input-area">
                     ${state.mode === 'typing' ? `
