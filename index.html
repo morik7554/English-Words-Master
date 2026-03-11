@@ -365,7 +365,10 @@
     if (isCorrect) {
         // コンボ加算
         state.comboCount++;
-        const multiplier = Math.min(2.0, 1 + (state.comboCount - 1) * 0.1);
+        let multiplier = 1.0;
+        if (state.comboCount >= 10) multiplier = 1.3;
+        else if (state.comboCount >= 7) multiplier = 1.2;
+        else if (state.comboCount >= 4) multiplier = 1.1;
 
         // 基礎点計算 (1秒後から0.5秒ごとに-4点)
         const elapsed = (Date.now() - state.questionStartTime) / 1000;
