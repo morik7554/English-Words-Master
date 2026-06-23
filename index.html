@@ -124,20 +124,21 @@
         }
 
         .card-area { display: flex; flex-direction: column; gap: 1rem; }
-        .answer-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 50px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
-        .choice-pool { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 1rem; }
+        .answer-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 60px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        .choice-pool { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 1rem; }
         .char-card {
             background: var(--accent);
             color: var(--bg-color);
-            width: 45px;
-            height: 45px;
+            width: 54px;
+            height: 54px;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 8px;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             font-weight: bold;
             box-shadow: 0 4px 0 #075985;
+            cursor: pointer;
         }
         .char-card.used { opacity: 0.2; pointer-events: none; background: #475569; box-shadow: none; transform: translateY(2px); }
 
