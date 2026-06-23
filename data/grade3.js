@@ -1,4 +1,4 @@
-export const grade3Words = [
+window.grade3Words = [
     { en: "safari", jp: "観察旅行、サファリ", unit: "Unit1" },
     { en: "gallery", jp: "ギャラリー、美術館", unit: "Unit1" },
     { en: "the Republic of South Africa", jp: "南アフリカ共和国", unit: "Unit1" },

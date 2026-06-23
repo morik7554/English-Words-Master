@@ -45,6 +45,7 @@
             padding: 20px;
             min-height: 0;
         }
+        #app.match-layout { max-width: 900px; }
 
         h1 { font-size: 1.8rem; text-align: center; margin-bottom: 1rem; color: var(--accent); }
         .screen {
@@ -188,6 +189,119 @@
         .my-stats-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--accent); }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
         .stat-val { font-weight: bold; color: var(--accent); }
+
+        .mode-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .matchGame-screen { overflow-y: auto; }
+        .match-header {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            align-items: stretch;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .match-stat {
+            padding: 8px 6px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            text-align: center;
+            font-size: 0.85rem;
+            line-height: 1.25;
+        }
+        .match-stat-value {
+            display: block;
+            margin-top: 2px;
+            font-size: 1.15rem;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+        .match-time { font-variant-numeric: tabular-nums; }
+        .match-time.low { color: var(--wrong); }
+        .match-bonus {
+            min-height: 28px;
+            margin: -4px 0 8px;
+            color: #facc15;
+            font-size: 1.05rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .match-board {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+        }
+        .match-column { min-width: 0; }
+        .match-column-title {
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .match-card-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-auto-rows: 72px;
+            gap: 10px;
+        }
+        button.match-card {
+            height: 100%;
+            min-height: 0;
+            margin: 0;
+            padding: 10px 12px;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            background: var(--card-bg);
+            font-size: 1.05rem;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+            overflow: hidden;
+        }
+        button.match-card.selected {
+            border-color: var(--accent);
+            background: #075985;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+        }
+        button.match-card.wrong {
+            border-color: var(--wrong);
+            background: rgba(239, 68, 68, 0.22);
+        }
+        .match-card-placeholder {
+            height: 100%;
+            visibility: hidden;
+        }
+        .match-quit {
+            min-height: 42px;
+            margin: 14px 0 0;
+            padding: 8px;
+            border-color: var(--wrong);
+            color: var(--wrong);
+        }
+        .match-result-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .match-result-stat {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            #app { padding: 12px; }
+            .mode-grid { grid-template-columns: 1fr; gap: 0; }
+            .mode-grid button { min-height: 52px; }
+            .match-header { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+            .match-stat { padding: 6px 4px; font-size: 0.75rem; }
+            .match-stat-value { font-size: 1rem; }
+            .match-board { gap: 8px; }
+            .match-card-list { grid-template-columns: 1fr; grid-auto-rows: 72px; gap: 7px; }
+            button.match-card { padding: 8px; font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -201,17 +315,22 @@
         </div>
     </div>
 
-    <script type="module">
-        import { grade1Words } from "./data/grade1.js";
-        import { grade2Words } from "./data/grade2.js";
-        import { grade3Words } from "./data/grade3.js";
+    <script src="./data/grade1.js"></script>
+    <script src="./data/grade2.js"></script>
+    <script src="./data/grade3.js"></script>
+    <script>
+        const { grade1Words, grade2Words, grade3Words } = window;
         const WORDS = grade1Words;
 
-        function getWordsByGradeKey(gradeKey) {
-            if (gradeKey === "grade1") return filterPhrases(grade1Words);
-            if (gradeKey === "grade2") return filterPhrases(grade2Words);
-            if (gradeKey === "grade3") return filterPhrases(grade3Words);
+        function getAllWordsByGradeKey(gradeKey) {
+            if (gradeKey === "grade1") return grade1Words;
+            if (gradeKey === "grade2") return grade2Words;
+            if (gradeKey === "grade3") return grade3Words;
             return [];
+        }
+
+        function getWordsByGradeKey(gradeKey) {
+            return filterPhrases(getAllWordsByGradeKey(gradeKey));
         }
 
         function getWordsByGrade() {
@@ -246,6 +365,7 @@
             mode: "typing",
             grade: "grade1",
             rankingGrade: null,
+            rankingMode: "typing",
             unit: "Unit1",
             timeLeft: 40,
             score: 0,
@@ -263,6 +383,19 @@
             comboCount: 0,
             remainingWords: [],
             remainingUnit: null,
+            matchEnglishCards: [],
+            matchJapaneseCards: [],
+            matchSelectedEnglish: null,
+            matchSelectedJapanese: null,
+            matchMistakes: 0,
+            matchCombo: 0,
+            matchMaxCombo: 0,
+            matchBonusMessage: "",
+            matchBonusToken: 0,
+            matchLocked: false,
+            matchWrongSelection: false,
+            matchCardId: 0,
+            matchPreviousRoundKeys: [],
             userStats: JSON.parse(localStorage.getItem('userStats')) || {
                 cumulativeTotal: 0,
                 gradeBests: {}
@@ -272,6 +405,37 @@
         if (!state.userStats.gradeBests && state.userStats.unitBests) {
             state.userStats.gradeBests = { grade1: { unitBests: state.userStats.unitBests } };
         }
+
+        if (!state.userStats.modeStats) {
+            state.userStats = {
+                modeStats: {
+                    typing: {
+                        cumulativeTotal: state.userStats.cumulativeTotal || 0,
+                        gradeBests: state.userStats.gradeBests || {}
+                    },
+                    card: { cumulativeTotal: 0, gradeBests: {} },
+                    match: { cumulativeTotal: 0, gradeBests: {} }
+                }
+            };
+            localStorage.setItem('userStats', JSON.stringify(state.userStats));
+        }
+
+        let statsNormalized = false;
+        ["typing", "card", "match"].forEach(mode => {
+            if (!state.userStats.modeStats[mode]) {
+                state.userStats.modeStats[mode] = { cumulativeTotal: 0, gradeBests: {} };
+                statsNormalized = true;
+            }
+            if (typeof state.userStats.modeStats[mode].cumulativeTotal !== "number") {
+                state.userStats.modeStats[mode].cumulativeTotal = 0;
+                statsNormalized = true;
+            }
+            if (!state.userStats.modeStats[mode].gradeBests) {
+                state.userStats.modeStats[mode].gradeBests = {};
+                statsNormalized = true;
+            }
+        });
+        if (statsNormalized) localStorage.setItem('userStats', JSON.stringify(state.userStats));
 
         console.log("WORDS.length", WORDS.length);
         console.log("UNITS", getUnits());
@@ -284,12 +448,21 @@
             localStorage.setItem('soundOn', state.soundOn);
         }
 
-        function updateRecords(sessionScore) {
-            state.userStats.cumulativeTotal += sessionScore;
-            if (!state.userStats.gradeBests[state.grade]) {
-                state.userStats.gradeBests[state.grade] = { unitBests: {} };
+        function getModeStats(mode = state.mode) {
+            return state.userStats.modeStats[mode];
+        }
+
+        function getUnitBest(mode, grade, unit) {
+            return getModeStats(mode)?.gradeBests?.[grade]?.unitBests?.[unit] || 0;
+        }
+
+        function updateRecords(sessionScore, mode = state.mode) {
+            const modeStats = getModeStats(mode);
+            modeStats.cumulativeTotal += sessionScore;
+            if (!modeStats.gradeBests[state.grade]) {
+                modeStats.gradeBests[state.grade] = { unitBests: {} };
             }
-            const unitBests = state.userStats.gradeBests[state.grade].unitBests;
+            const unitBests = modeStats.gradeBests[state.grade].unitBests;
             const currentBest = unitBests[state.unit] || 0;
             if (sessionScore > currentBest) {
                 unitBests[state.unit] = sessionScore;
@@ -408,6 +581,156 @@
     }
 }
 
+        function getMatchWords() {
+            const seen = new Set();
+            return getAllWordsByGradeKey(state.grade).filter(word => {
+                if (word.unit !== state.unit) return false;
+                const key = `${word.en}\u0000${word.jp}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function createMatchCard(word) {
+            state.matchCardId++;
+            return { id: state.matchCardId, word };
+        }
+
+        function fillMatchRound() {
+            const previousKeys = new Set(state.matchPreviousRoundKeys);
+            const words = getMatchWords();
+            const freshWords = shuffleArray(words.filter(word => !previousKeys.has(`${word.en}\u0000${word.jp}`)));
+            const repeatedWords = shuffleArray(words.filter(word => previousKeys.has(`${word.en}\u0000${word.jp}`)));
+            const roundWords = [...freshWords, ...repeatedWords].slice(0, 8);
+            const cards = roundWords.map(createMatchCard);
+
+            state.matchPreviousRoundKeys = roundWords.map(word => `${word.en}\u0000${word.jp}`);
+            state.matchEnglishCards = shuffleArray(cards);
+            state.matchJapaneseCards = shuffleArray(cards);
+        }
+
+        function startMatchMode() {
+            clearInterval(state.timerId);
+            state.score = 0;
+            state.correctCount = 0;
+            state.matchMistakes = 0;
+            state.matchCombo = 0;
+            state.matchMaxCombo = 0;
+            state.matchBonusMessage = "";
+            state.matchBonusToken++;
+            state.timeLeft = 60;
+            state.matchSelectedEnglish = null;
+            state.matchSelectedJapanese = null;
+            state.matchLocked = false;
+            state.matchWrongSelection = false;
+            state.matchPreviousRoundKeys = [];
+            fillMatchRound();
+            state.screen = "matchGame";
+            render();
+            startMatchTimer();
+        }
+
+        function startMatchTimer() {
+            state.timerId = setInterval(() => {
+                state.timeLeft--;
+                const timerEl = document.querySelector('.match-time');
+                if (timerEl) {
+                    const valueEl = timerEl.querySelector('.match-stat-value');
+                    if (valueEl) valueEl.innerText = `${state.timeLeft}秒`;
+                    if (state.timeLeft <= 10) timerEl.classList.add('low');
+                }
+                if (state.timeLeft <= 0) endMatchMode();
+            }, 1000);
+        }
+
+        function selectMatchCard(type, cardId) {
+            if (state.matchLocked || state.timeLeft <= 0) return;
+            const selectedKey = type === "english" ? "matchSelectedEnglish" : "matchSelectedJapanese";
+            state[selectedKey] = state[selectedKey] === cardId ? null : cardId;
+
+            if (state.matchSelectedEnglish !== null && state.matchSelectedJapanese !== null) {
+                checkMatch();
+            } else {
+                render();
+            }
+        }
+
+        function checkMatch() {
+            state.matchLocked = true;
+            const isCorrect = state.matchSelectedEnglish === state.matchSelectedJapanese;
+
+            if (isCorrect) {
+                state.matchCombo++;
+                state.matchMaxCombo = Math.max(state.matchMaxCombo, state.matchCombo);
+                let bonus = 0;
+                if (state.matchCombo === 10) bonus = 30;
+                else if (state.matchCombo === 5) bonus = 10;
+                else if (state.matchCombo === 3) bonus = 5;
+
+                state.score += 10 + bonus;
+                state.correctCount++;
+                if (bonus > 0) {
+                    const bonusToken = ++state.matchBonusToken;
+                    state.matchBonusMessage = `${state.matchCombo} Combo Bonus +${bonus}`;
+                    setTimeout(() => {
+                        if (state.screen !== "matchGame" || state.matchBonusToken !== bonusToken) return;
+                        state.matchBonusMessage = "";
+                        render();
+                    }, 1000);
+                }
+                triggerFeedback(true);
+                render();
+                setTimeout(() => {
+                    if (state.screen !== "matchGame") return;
+                    replaceMatchedCards();
+                }, 220);
+                return;
+            }
+
+            state.matchMistakes++;
+            state.score -= 3;
+            state.matchCombo = 0;
+            state.matchBonusMessage = "";
+            state.matchBonusToken++;
+            state.matchWrongSelection = true;
+            triggerFeedback(false);
+            render();
+            setTimeout(() => {
+                if (state.screen !== "matchGame") return;
+                state.matchSelectedEnglish = null;
+                state.matchSelectedJapanese = null;
+                state.matchWrongSelection = false;
+                state.matchLocked = false;
+                render();
+            }, 350);
+        }
+
+        function replaceMatchedCards() {
+            const matchedId = state.matchSelectedEnglish;
+            state.matchEnglishCards = state.matchEnglishCards.map(card => card?.id === matchedId ? null : card);
+            state.matchJapaneseCards = state.matchJapaneseCards.map(card => card?.id === matchedId ? null : card);
+
+            state.matchSelectedEnglish = null;
+            state.matchSelectedJapanese = null;
+            state.matchWrongSelection = false;
+            state.matchLocked = false;
+
+            if (state.matchEnglishCards.every(card => card === null)) {
+                fillMatchRound();
+            }
+            render();
+        }
+
+        function endMatchMode() {
+            clearInterval(state.timerId);
+            state.timeLeft = 0;
+            state.matchLocked = true;
+            state.screen = "matchResult";
+            updateRecords(state.score, "match");
+            render();
+        }
+
         function startCountdown() {
             state.screen = "countdown";
             state.countdownValue = 3;
@@ -416,6 +739,10 @@
                 state.countdownValue--;
                 if (state.countdownValue <= 0) {
                     clearInterval(interval);
+                    if (state.mode === "match") {
+                        startMatchMode();
+                        return;
+                    }
                     state.screen = "game";
                     state.score = 0; state.correctCount = 0; state.wrongWords = []; state.lastCorrectEn = null; state.comboCount = 0;
                     state.remainingWords = []; state.remainingUnit = null;
@@ -449,6 +776,7 @@
         function render() {
             const container = $('app');
             const isNewScreen = state.screen !== state.lastRenderedScreen;
+            container.classList.toggle('match-layout', state.screen === "matchGame");
             container.innerHTML = '';
             const screenDiv = document.createElement('div');
             screenDiv.className = `screen active ${state.screen}-screen ${isNewScreen ? 'screen-fade' : ''}`;
@@ -461,6 +789,8 @@
                 case "countdown": renderCountdown(screenDiv); break;
                 case "game": renderGame(screenDiv); break;
                 case "result": renderResult(screenDiv); break;
+                case "matchGame": renderMatchGame(screenDiv); break;
+                case "matchResult": renderMatchResult(screenDiv); break;
                 case "ranking": renderRanking(screenDiv); break;
                 case "rankingUnits": renderRankingUnits(screenDiv); break;
                 case "settings": renderSettings(screenDiv); break;
@@ -523,16 +853,17 @@
         function renderSelect(el) {
             el.innerHTML = `
                 <h1>モード・ユニット選択</h1>
-                <div class="select-group"><p class="select-label">モード</p><div style="display: flex; gap: 10px;">
+                <div class="select-group"><p class="select-label">モード</p><div class="mode-grid">
                     <button id="mode-typing" class="${state.mode === 'typing' ? '' : 'secondary'}">Typing</button>
                     <button id="mode-card" class="${state.mode === 'card' ? '' : 'secondary'}">Card</button>
+                    <button id="mode-match" class="${state.mode === 'match' ? '' : 'secondary'}">マッチモード</button>
                 </div></div>
                 <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     ${getUnits().map(u => `
                         <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}" style="flex-direction: column;">
                             <div>${u}</div>
                             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                                ${state.userStats.gradeBests?.[state.grade]?.unitBests?.[u] || 0}
+                                ${getUnitBest(state.mode, state.grade, u)}
                             </div>
                         </button>
                     `).join('')}
@@ -544,6 +875,7 @@
             `;
             el.querySelector('#mode-typing').onclick = () => { state.mode = 'typing'; render(); };
             el.querySelector('#mode-card').onclick = () => { state.mode = 'card'; render(); };
+            el.querySelector('#mode-match').onclick = () => { state.mode = 'match'; render(); };
             el.querySelectorAll('.unit-btn').forEach(b => { b.onclick = () => { state.unit = b.dataset.unit; render(); }; });
             el.querySelector('#btn-back').onclick = () => { state.screen = "title"; render(); };
             el.querySelector('#btn-go').onclick = () => { startCountdown(); };
@@ -552,7 +884,9 @@
         function renderCountdown(el) {
             el.innerHTML = `
                 <div class="countdown-number">${state.countdownValue}</div>
-                <p style="margin-top: 20px; font-weight: bold; font-size: 1.2rem;">Ready...</p>
+                <p style="margin-top: 20px; font-weight: bold; font-size: 1.2rem;">
+                    ${state.mode === "match" ? "マッチモード" : "Ready..."}
+                </p>
             `;
         }
 
@@ -610,6 +944,103 @@
                     s.onclick = () => { const idx = parseInt(s.dataset.idx); const removed = state.cardAnswer.splice(idx, 1)[0]; removed.used = false; render(); };
                 });
             }
+        }
+
+        function renderMatchGame(el) {
+            const englishCards = state.matchEnglishCards.map(card => {
+                if (!card) return '<div class="match-card-placeholder" aria-hidden="true"></div>';
+                const isSelected = state.matchSelectedEnglish === card.id;
+                const classes = [
+                    "match-card",
+                    isSelected ? "selected" : "",
+                    isSelected && state.matchWrongSelection ? "wrong" : ""
+                ].filter(Boolean).join(" ");
+                return `<button class="${classes}" data-match-type="english" data-card-id="${card.id}">${card.word.en}</button>`;
+            }).join("");
+            const japaneseCards = state.matchJapaneseCards.map(card => {
+                if (!card) return '<div class="match-card-placeholder" aria-hidden="true"></div>';
+                const isSelected = state.matchSelectedJapanese === card.id;
+                const classes = [
+                    "match-card",
+                    isSelected ? "selected" : "",
+                    isSelected && state.matchWrongSelection ? "wrong" : ""
+                ].filter(Boolean).join(" ");
+                return `<button class="${classes}" data-match-type="japanese" data-card-id="${card.id}">${card.word.jp}</button>`;
+            }).join("");
+
+            el.innerHTML = `
+                <div class="match-header">
+                    <div class="match-stat match-time ${state.timeLeft <= 10 ? 'low' : ''}">残り時間<span class="match-stat-value">${state.timeLeft}秒</span></div>
+                    <div class="match-stat">Match Score<span class="match-stat-value">${state.score}</span></div>
+                    <div class="match-stat">正解数<span class="match-stat-value">${state.correctCount}</span></div>
+                    <div class="match-stat">ミス数<span class="match-stat-value">${state.matchMistakes}</span></div>
+                    <div class="match-stat">コンボ<span class="match-stat-value">${state.matchCombo}</span></div>
+                </div>
+                <div class="match-bonus">${state.matchBonusMessage}</div>
+                <div class="match-board">
+                    <section class="match-column">
+                        <div class="match-column-title">英語</div>
+                        <div class="match-card-list">${englishCards}</div>
+                    </section>
+                    <section class="match-column">
+                        <div class="match-column-title">日本語</div>
+                        <div class="match-card-list">${japaneseCards}</div>
+                    </section>
+                </div>
+                <button id="btn-match-quit" class="secondary match-quit">中断する</button>
+            `;
+
+            el.querySelectorAll('.match-card').forEach(card => {
+                card.onclick = () => selectMatchCard(card.dataset.matchType, Number(card.dataset.cardId));
+            });
+            el.querySelector('#btn-match-quit').onclick = () => {
+                showModal("ゲームを中断しますか？", [
+                    { text: "いいえ" },
+                    {
+                        text: "はい",
+                        onClick: () => {
+                            clearInterval(state.timerId);
+                            state.matchLocked = true;
+                            state.screen = "select";
+                            render();
+                        }
+                    }
+                ]);
+            };
+        }
+
+        function renderMatchResult(el) {
+            el.innerHTML = `
+                <h1>マッチモード結果</h1>
+                <div class="question-card" style="padding: 24px; margin-bottom: 1rem;">
+                    <div style="font-size: 1.1rem; color: var(--text-muted);">Final Score</div>
+                    <div style="font-size: 3.2rem; font-weight: bold; color: var(--accent);">${state.score}</div>
+                    <div class="match-result-stats" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+                        <div class="match-result-stat">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">正解数</div>
+                            <div style="font-size: 1.6rem; font-weight: bold; color: var(--correct);">${state.correctCount}</div>
+                        </div>
+                        <div class="match-result-stat">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ミス</div>
+                            <div style="font-size: 1.6rem; font-weight: bold; color: var(--wrong);">${state.matchMistakes}</div>
+                        </div>
+                        <div class="match-result-stat">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">最大コンボ</div>
+                            <div style="font-size: 1.6rem; font-weight: bold; color: #facc15;">${state.matchMaxCombo}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 14px;">Player: ${state.nickname}</div>
+                </div>
+                <div style="margin-top: auto;">
+                    <button id="btn-match-retry">もう一度プレイ</button>
+                    <button id="btn-match-select" class="secondary">単元選択に戻る</button>
+                </div>
+            `;
+            el.querySelector('#btn-match-retry').onclick = () => startCountdown();
+            el.querySelector('#btn-match-select').onclick = () => {
+                state.screen = "select";
+                render();
+            };
         }
 
         function renderResult(el) {
@@ -674,14 +1105,22 @@
 
         function renderRankingUnits(el) {
             const gradeKey = state.rankingGrade || "grade1";
-            const gradeStats = state.userStats.gradeBests?.[gradeKey]?.unitBests || {};
+            const modeKey = state.rankingMode || "typing";
+            const modeStats = getModeStats(modeKey);
+            const gradeStats = modeStats.gradeBests?.[gradeKey]?.unitBests || {};
             const totalHighScore = Object.values(gradeStats).reduce((a, b) => a + b, 0);
             const gradeLabel = gradeKey === "grade1" ? "1年" : gradeKey === "grade2" ? "2年" : "3年";
+            const modeLabel = modeKey === "typing" ? "Typing" : modeKey === "card" ? "Card" : "マッチ";
             el.innerHTML = `
                 <h1>個人記録（${gradeLabel}）</h1>
+                <div class="mode-grid" style="margin-bottom: 12px;">
+                    <button data-ranking-mode="typing" class="${modeKey === 'typing' ? '' : 'secondary'}">Typing</button>
+                    <button data-ranking-mode="card" class="${modeKey === 'card' ? '' : 'secondary'}">Card</button>
+                    <button data-ranking-mode="match" class="${modeKey === 'match' ? '' : 'secondary'}">マッチ</button>
+                </div>
                 <div class="my-stats-card">
-                    <p style="font-weight:bold; margin-bottom:10px; border-bottom:1px solid #334155;">あなたのハイスコア</p>
-                    <div class="stat-row"><span>累計ポイント:</span> <span class="stat-val">${state.userStats.cumulativeTotal}</span></div>
+                    <p style="font-weight:bold; margin-bottom:10px; border-bottom:1px solid #334155;">${modeLabel} のハイスコア</p>
+                    <div class="stat-row"><span>累計ポイント:</span> <span class="stat-val">${modeStats.cumulativeTotal}</span></div>
                     <div class="stat-row"><span>自己ベスト合計:</span> <span class="stat-val">${totalHighScore}</span></div>
                     <div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted);">ユニット別ベストスコア:</div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
@@ -694,6 +1133,12 @@
                 </div>
                 <div style="margin-top: auto;"><button id="btn-rank-units-back" class="secondary">戻る</button></div>
             `;
+            el.querySelectorAll('[data-ranking-mode]').forEach(button => {
+                button.onclick = () => {
+                    state.rankingMode = button.dataset.rankingMode;
+                    render();
+                };
+            });
             el.querySelector('#btn-rank-units-back').onclick = () => { state.screen = "ranking"; render(); };
         }
 
@@ -708,7 +1153,13 @@
             el.querySelector('#btn-reset-rank').onclick = () => {
                 showModal("あなたの全てのデータを削除しますか？", [{ text: "キャンセル" }, { text: "削除する", type: "danger", onClick: () => {
                     localStorage.removeItem('userStats');
-                    state.userStats = { cumulativeTotal: 0, gradeBests: {} };
+                    state.userStats = {
+                        modeStats: {
+                            typing: { cumulativeTotal: 0, gradeBests: {} },
+                            card: { cumulativeTotal: 0, gradeBests: {} },
+                            match: { cumulativeTotal: 0, gradeBests: {} }
+                        }
+                    };
                     showModal("データを削除しました。");
                 }}]);
             };
@@ -735,7 +1186,9 @@
 
         function init() { if (state.nickname) state.screen = "title"; render(); }
         init();
-        window.onbeforeunload = (e) => { if (state.screen === "game") return "終了しますか？"; };
+        window.onbeforeunload = (e) => {
+            if (state.screen === "game" || state.screen === "matchGame") return "終了しますか？";
+        };
     </script>
 </body>
 </html>
