@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Codex Word Master</title>
+    <link rel="stylesheet" href="./handwriting.css">
     <style>
         :root {
             --bg-color: #0f172a;
@@ -318,6 +319,7 @@
     <script src="./data/grade1.js"></script>
     <script src="./data/grade2.js"></script>
     <script src="./data/grade3.js"></script>
+    <script src="./handwriting.js"></script>
     <script>
         const { grade1Words, grade2Words, grade3Words } = window;
         const WORDS = grade1Words;
@@ -857,6 +859,7 @@
                     <button id="mode-typing" class="${state.mode === 'typing' ? '' : 'secondary'}">Typing</button>
                     <button id="mode-card" class="${state.mode === 'card' ? '' : 'secondary'}">Card</button>
                     <button id="mode-match" class="${state.mode === 'match' ? '' : 'secondary'}">マッチモード</button>
+                    <button id="mode-handwriting" class="${state.mode === 'handwriting' ? '' : 'secondary'}">手書きモード</button>
                 </div></div>
                 <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     ${getUnits().map(u => `
@@ -876,9 +879,22 @@
             el.querySelector('#mode-typing').onclick = () => { state.mode = 'typing'; render(); };
             el.querySelector('#mode-card').onclick = () => { state.mode = 'card'; render(); };
             el.querySelector('#mode-match').onclick = () => { state.mode = 'match'; render(); };
+            el.querySelector('#mode-handwriting').onclick = () => { state.mode = 'handwriting'; render(); };
             el.querySelectorAll('.unit-btn').forEach(b => { b.onclick = () => { state.unit = b.dataset.unit; render(); }; });
             el.querySelector('#btn-back').onclick = () => { state.screen = "title"; render(); };
-            el.querySelector('#btn-go').onclick = () => { startCountdown(); };
+            el.querySelector('#btn-go').onclick = () => {
+                if (state.mode === 'handwriting') {
+                    state.screen = 'handwriting';
+                    state.lastRenderedScreen = 'handwriting';
+                    HandwritingMode.mount({
+                        root: $('app'),
+                        words: getWordsByGrade().filter(word => word.unit === state.unit),
+                        onExit: () => { state.screen = 'select'; render(); }
+                    });
+                    return;
+                }
+                startCountdown();
+            };
         }
 
         function renderCountdown(el) {
