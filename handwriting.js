@@ -13,7 +13,7 @@
         correct: 0,
         score: 0,
         combo: 0,
-        timeLeft: 180,
+        timeLeft: 90,
         timerId: null,
         advanceTimerId: null,
         questionStartTime: 0,
@@ -105,10 +105,10 @@
 
     function calculatePoints(elapsedSeconds, combo) {
         let basePoints = 100;
-        if (elapsedSeconds > 10) {
-            basePoints -= Math.floor((elapsedSeconds - 10) / 2) * 4;
+        if (elapsedSeconds > 1) {
+            basePoints -= Math.floor((elapsedSeconds - 1) / 0.5) * 4;
         }
-        return Math.floor(Math.max(20, basePoints) * comboMultiplier(combo));
+        return Math.floor(Math.max(0, basePoints) * comboMultiplier(combo));
     }
 
     function loadTesseract() {
@@ -474,7 +474,7 @@
             session.correct = 0;
             session.score = 0;
             session.combo = 0;
-            session.timeLeft = 180;
+            session.timeLeft = 90;
             session.wrongWords = [];
             session.ended = false;
             session.runId++;
@@ -513,7 +513,7 @@
         session.correct = 0;
         session.score = 0;
         session.combo = 0;
-        session.timeLeft = 180;
+        session.timeLeft = 90;
         session.wrongWords = [];
         session.ended = false;
         clearTimeout(session.advanceTimerId);
