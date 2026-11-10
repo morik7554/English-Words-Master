@@ -788,6 +788,7 @@
                 case "title": renderTitle(screenDiv); break;
                 case "grade": renderGrade(screenDiv); break;
                 case "select": renderSelect(screenDiv); break;
+                case "modeSelect": renderModeSelect(screenDiv); break;
                 case "countdown": renderCountdown(screenDiv); break;
                 case "game": renderGame(screenDiv); break;
                 case "result": renderResult(screenDiv); break;
@@ -854,34 +855,46 @@
 
         function renderSelect(el) {
             el.innerHTML = `
-                <h1>モード・ユニット選択</h1>
-                <div class="select-group"><p class="select-label">モード</p><div class="mode-grid">
+                <h1>ユニット選択</h1>
+                <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    ${getUnits().map(u => `
+                        <button class="unit-btn secondary" data-unit="${u}">${u}</button>
+                    `).join('')}
+                </div></div>
+                <div class="select-actions">
+                    <button id="btn-back" class="secondary">戻る</button>
+                </div>
+            `;
+            el.querySelectorAll('.unit-btn').forEach(b => {
+                b.onclick = () => {
+                    state.unit = b.dataset.unit;
+                    state.screen = 'modeSelect';
+                    render();
+                };
+            });
+            el.querySelector('#btn-back').onclick = () => { state.screen = "grade"; render(); };
+        }
+
+        function renderModeSelect(el) {
+            el.innerHTML = `
+                <h1>モード選択</h1>
+                <p class="select-label" style="text-align: center; margin-bottom: 1rem;">${state.unit}</p>
+                <div class="select-group"><div class="mode-grid">
                     <button id="mode-typing" class="${state.mode === 'typing' ? '' : 'secondary'}">Typing</button>
                     <button id="mode-card" class="${state.mode === 'card' ? '' : 'secondary'}">Card</button>
                     <button id="mode-match" class="${state.mode === 'match' ? '' : 'secondary'}">マッチモード</button>
                     <button id="mode-handwriting" class="${state.mode === 'handwriting' ? '' : 'secondary'}">手書きモード</button>
                 </div></div>
-                <div class="select-group"><p class="select-label">ユニット</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    ${getUnits().map(u => `
-                        <button class="unit-btn ${state.unit === u ? '' : 'secondary'}" data-unit="${u}" style="flex-direction: column;">
-                            <div>${u}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                                ${getUnitBest(state.mode, state.grade, u)}
-                            </div>
-                        </button>
-                    `).join('')}
-                </div></div>
                 <div class="select-actions">
                     <button id="btn-go" style="background: var(--correct); border-color: var(--correct);">ゲーム開始！</button>
-                    <button id="btn-back" class="secondary">戻る</button>
+                    <button id="btn-back" class="secondary">ユニット選択に戻る</button>
                 </div>
             `;
             el.querySelector('#mode-typing').onclick = () => { state.mode = 'typing'; render(); };
             el.querySelector('#mode-card').onclick = () => { state.mode = 'card'; render(); };
             el.querySelector('#mode-match').onclick = () => { state.mode = 'match'; render(); };
             el.querySelector('#mode-handwriting').onclick = () => { state.mode = 'handwriting'; render(); };
-            el.querySelectorAll('.unit-btn').forEach(b => { b.onclick = () => { state.unit = b.dataset.unit; render(); }; });
-            el.querySelector('#btn-back').onclick = () => { state.screen = "title"; render(); };
+            el.querySelector('#btn-back').onclick = () => { state.screen = "select"; render(); };
             el.querySelector('#btn-go').onclick = () => {
                 if (state.mode === 'handwriting') {
                     state.screen = 'handwriting';
@@ -889,7 +902,7 @@
                     HandwritingMode.mount({
                         root: $('app'),
                         words: getWordsByGrade().filter(word => word.unit === state.unit),
-                        onExit: () => { state.screen = 'select'; render(); }
+                        onExit: () => { state.screen = 'modeSelect'; render(); }
                     });
                     return;
                 }
