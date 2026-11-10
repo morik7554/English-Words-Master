@@ -50,6 +50,52 @@
         return String(value).toLowerCase().replace(/[^a-z0-9']/g, "");
     }
 
+    function editDistance(left, right) {
+        const rows = left.length + 1;
+        const columns = right.length + 1;
+        const matrix = Array.from({ length: rows }, () => Array(columns).fill(0));
+
+        for (let row = 0; row < rows; row++) matrix[row][0] = row;
+        for (let column = 0; column < columns; column++) matrix[0][column] = column;
+
+        for (let row = 1; row < rows; row++) {
+            for (let column = 1; column < columns; column++) {
+                const substitutionCost = left[row - 1] === right[column - 1] ? 0 : 1;
+                matrix[row][column] = Math.min(
+                    matrix[row - 1][column] + 1,
+                    matrix[row][column - 1] + 1,
+                    matrix[row - 1][column - 1] + substitutionCost
+                );
+
+                if (
+                    row > 1 &&
+                    column > 1 &&
+                    left[row - 1] === right[column - 2] &&
+                    left[row - 2] === right[column - 1]
+                ) {
+                    matrix[row][column] = Math.min(
+                        matrix[row][column],
+                        matrix[row - 2][column - 2] + 1
+                    );
+                }
+            }
+        }
+
+        return matrix[left.length][right.length];
+    }
+
+    function isAcceptedAnswer(answer, expected) {
+        const normalizedAnswer = normalize(answer);
+        const normalizedExpected = normalize(expected);
+        if (normalizedAnswer === normalizedExpected) return true;
+
+        const wordLength = normalizedExpected.length;
+        if (wordLength <= 3) return false;
+
+        const allowedErrors = Math.max(1, Math.floor(wordLength * 0.25));
+        return editDistance(normalizedAnswer, normalizedExpected) <= allowedErrors;
+    }
+
     function comboMultiplier(combo) {
         if (combo >= 10) return 1.3;
         if (combo >= 7) return 1.2;
@@ -312,7 +358,7 @@
 
         session.graded = true;
         const word = currentWord();
-        const correct = normalize(answer) === normalize(word.en);
+        const correct = isAcceptedAnswer(answer, word.en);
         if (typeof window.speakWord === "function") window.speakWord(word.en);
         if (correct) {
             session.combo++;
